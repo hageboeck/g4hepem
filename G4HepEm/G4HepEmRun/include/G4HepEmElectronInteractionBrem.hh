@@ -13,6 +13,10 @@
 class  G4HepEmTLData;
 struct G4HepEmElectronData;
 
+// #define SEARCHALGO LinSearch
+// #define SEARCHALGO NewSearch
+#define SEARCHALGO BinarySearch
+
 // Bremsstrahlung interaction based on:
 // 1. SB: - the numerical Seltzer-Berger DCS for the emitted photon energy.
 //        - used between 1 keV - 1 GeV primary e-/e+ kinetic energies.
@@ -109,7 +113,7 @@ public:
         // find lower index of the values in the Cumulative Function: use linear
         // instead of binary search because it's faster in our case
         // note: every 3rd value of `stData` is the cumulative for the corresponding kappa grid values
-        const int cumLIndx3 = LinSearch(stData, theSBTables->fNumKappa, cumRV) - 3;
+        const int cumLIndx3 = SEARCHALGO(stData, theSBTables->fNumKappa, cumRV) - 3;
         const int  cumLIndx = cumLIndx3/3;
         const double   cumL = stData[cumLIndx3];
         const double     pA = stData[cumLIndx3+1];
@@ -240,6 +244,41 @@ public:
                                double* thePrimElecDir, RandomEngine* rnge);
 
   private:
+
+  // Search (with step size of 3) used in the photon energy sampling part
+  // of the SB (Seltzer-Berger) brem model.
+  // Find lower bin index of value: used in case of CDF values i.e. val in [0,1)
+  // while vector elements in [0,1]
+  // note: every 3rd value of the vect contains the kappa-cumulative values
+  G4HepEmHostDevice
+  static int NewSearch(const double* vect, const int size, const double val) {
+    static constexpr int stride = 3;
+    // In TestEM3, the lower bins are rarely hit.
+    // The MPV is 6, and the average 11.2
+    int i = 0;
+    // Avoid reading every entry by advancing n at a time
+    while (i < size && vect[i * stride] < val) i += 4;
+
+    // Fine search for correct bin
+    while (i >= size || vect[(i-1) * stride] > val) i--;
+
+    return i*stride;
+  }
+
+  G4HepEmHostDevice
+  static int BinarySearch(const double * vect, const int size, const double val) {
+    constexpr int stride = 3;
+    auto lowerBound = 0;
+    auto upperBound = size;
+    do {
+      const auto pivot = (lowerBound + upperBound) / 2;
+      if (vect[stride * pivot] <= val) lowerBound = pivot;
+      else upperBound = pivot;
+    } while (upperBound - lowerBound > 3);
+
+    do ++lowerBound; while (vect[lowerBound*stride] <= val && lowerBound < size);
+    return lowerBound*stride;
+  }
 
   // Simple linear search (with step of 3!) used in the photon energy sampling part
   // of the SB (Seltzer-Berger) brem model.
