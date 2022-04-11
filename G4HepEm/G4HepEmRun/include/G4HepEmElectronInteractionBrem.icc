@@ -120,25 +120,3 @@ void G4HepEmElectronInteractionBrem::SampleDirections(const double thePrimEkin, 
   thePrimElecDir[1] *= norm;
   thePrimElecDir[2] *= norm;
 }
-
-
-// find lower bin index of value: used in acse of CDF values i.e. val in [0,1)
-// while vector elements in [0,1]
-// note: every 3rd value of the vect contains the kappa-cumulutaive values
-int G4HepEmElectronInteractionBrem::LinSearch(const double* vect, const int size, const double val) {
-  int i = 0;
-  const int size3 = 3*size;
-  while (i + 9 < size3) {
-    if (vect [i + 0] > val) return i + 0;
-    if (vect [i + 3] > val) return i + 3;
-    if (vect [i + 6] > val) return i + 6;
-    if (vect [i + 9] > val) return i + 9;
-    i += 12;
-  }
-  while (i < size3) {
-    if (vect [i] > val)
-      break;
-    i += 3;
-  }
-  return i;
-}

@@ -239,11 +239,28 @@ public:
   static void SampleDirections(const double thePrimEkin, const double theSecGammaEkin, double* theSecGammaDir,
                                double* thePrimElecDir, RandomEngine* rnge);
 
+  private:
 
   // Simple linear search (with step of 3!) used in the photon energy sampling part
   // of the SB (Seltzer-Berger) brem model.
   G4HepEmHostDevice
-  static int LinSearch(const double* vect, const int size, const double val);
+  static int LinSearch(const double* vect, const int size, const double val) {
+    int i = 0;
+    const int size3 = 3*size;
+    while (i + 9 < size3) {
+      if (vect [i + 0] > val) return i + 0;
+      if (vect [i + 3] > val) return i + 3;
+      if (vect [i + 6] > val) return i + 6;
+      if (vect [i + 9] > val) return i + 9;
+      i += 12;
+    }
+    while (i < size3) {
+      if (vect [i] > val)
+        break;
+      i += 3;
+    }
+    return i;
+  }
 };
 
 #endif // G4HepEmElectronInteractionBrem_HH
