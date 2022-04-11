@@ -4,7 +4,7 @@
 
 // times = 1.0 for Brem and -1.0 for Pair production
 // densityCor = 0.0  for Pair production
-G4HepEmHostDevice
+G4HepEmHostDevice G4HepEmForceCUDAInline
 void EvaluateLPMFunctions(double& funcXiS, double& funcGS, double& funcPhiS, const double egamma,
      const double etotal, const double elpm, const double z23, const double ilVarS1,
      const double ilVarS1Cond, const double densityCor, const double times) {

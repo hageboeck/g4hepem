@@ -47,6 +47,7 @@ void RotateToReferenceFrame(double* dir, const double* refDir) {
 
 
 // use the improved, robust spline interpolation that I put in G4 10.6
+G4HepEmForceCUDAInline
 double GetSplineLog(int ndata, double* xdata, double* ydata, double* secderiv, double x, double logx, double logxmin, double invLDBin) {
   // make sure that $x \in  [x[0],x[ndata-1]]$
   const double xv = G4HepEmMax(xdata[0], G4HepEmMin(xdata[ndata-1], x));
