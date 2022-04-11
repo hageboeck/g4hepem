@@ -9,6 +9,12 @@
 #define G4HepEmHostDevice
 #endif
 
+#ifdef __CUDACC__
+#define G4HepEmForceCUDAInline __forceinline__
+#else
+#define G4HepEmForceCUDAInline
+#endif
+
 #ifdef __CUDA_ARCH__
 // If compiling for the device, make the constant available.
 #define G4HepEmHostDeviceConstant __device__
